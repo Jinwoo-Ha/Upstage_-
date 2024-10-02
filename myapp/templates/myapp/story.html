@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block extra_style %}
+<style>
+    .book {
+        background-color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    .book-title {
+        color: var(--secondary-color);
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        font-family: 'Jua', sans-serif;
+    }
+    .story-image-container {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+    .story-image {
+        max-width: 100%;
+        max-height: 400px;
+        object-fit: contain;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .page {
+        margin-bottom: 2rem;
+        font-size: 1.2rem;
+        line-height: 1.8;
+        color: var(--text-color);
+    }
+    .navigation {
+        text-align: center;
+        margin-top: 2rem;
+    }
+    .nav-button {
+        background-color: var(--secondary-color);
+        color: white;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        margin: 0 10px;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        font-family: 'Jua', sans-serif;
+    }
+    .nav-button:hover {
+        background-color: var(--primary-color);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="book">
+    <h2 class="book-title">{{ story.title }}</h2>
+    <div class="story-image-container">
+        <img id="story-image" class="story-image" src="" alt="Story illustration">
+    </div>
+    <div id="story-content" class="page"></div>
+    <div class="navigation">
+        <button id="prev-page" class="nav-button">이전 페이지</button>
+        <button id="next-page" class="nav-button">다음 페이지</button>
+    </div>
+</div>
+
+<script>
+    const content = "{{ story.content|escapejs }}";
+    const pages = content.split('\n\n');
+    let currentPage = 0;
+
+    function showPage(pageNum) {
+        document.getElementById('story-content').innerText = pages[pageNum];
+        updateStoryImage(pageNum);
+    }
+
+    function updateStoryImage(pageNum) {
+        const placeholderImage = "/api/placeholder/800/400";
+        document.getElementById('story-image').src = placeholderImage;
+    }
+
+    document.getElementById('prev-page').addEventListener('click', () => {
+        if (currentPage > 0) {
+            currentPage--;
+            showPage(currentPage);
+        }
+    });
+
+    document.getElementById('next-page').addEventListener('click', () => {
+        if (currentPage < pages.length - 1) {
+            currentPage++;
+            showPage(currentPage);
+        } else {
+            window.location.href = "{% url 'end' %}";
+        }
+    });
+
+    showPage(0);
+</script>
+{% endblock %}
