@@ -3,12 +3,14 @@ from dotenv import load_dotenv
 from langchain_upstage import ChatUpstage
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
+import openai
 
 load_dotenv()
 
+api_key = os.getenv("UPSTAGE_API_KEY")
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
 def generate_story(name, age, country, interests):
-    api_key = os.getenv("UPSTAGE_API_KEY")
-    
     if not api_key:
         raise ValueError("UPSTAGE_API_KEY 환경 변수가 설정되지 않았습니다.")
 
@@ -46,3 +48,33 @@ def generate_story(name, age, country, interests):
 
     result = chain.invoke({"name": name, "age": age, "country": country, "interests": interests})
     return result
+
+from openai import OpenAI
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+def generate_image(prompt):
+    try:
+        response = client.images.generate(
+            model="dall-e-3",
+            prompt=prompt,
+            size="1024x1024",
+            quality="standard",
+            n=1,
+        )
+        return response.data[0].url
+    except Exception as e:
+        print(f"이미지 생성 중 오류 발생: {e}")
+        return None
+
+def generate_story_with_images(name, age, country, interests):
+    story_content = generate_story(name, age, country, interests)
+    pages = story_content.split('\n\n')
+    images = []
+
+    for page in pages:
+        image_prompt = f"{age}살 {name}이(가) {country}에서: {page[:100]}..."
+        image_url = generate_image(image_prompt)
+        images.append(image_url)
+
+    return story_content, images

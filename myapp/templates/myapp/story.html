@@ -72,18 +72,13 @@
 </div>
 
 <script>
-    const content = "{{ story.content|escapejs }}";
-    const pages = content.split('\n\n');
+    const content = JSON.parse('{{ content|escapejs }}');
     let currentPage = 0;
 
     function showPage(pageNum) {
-        document.getElementById('story-content').innerText = pages[pageNum];
-        updateStoryImage(pageNum);
-    }
-
-    function updateStoryImage(pageNum) {
-        const placeholderImage = "/api/placeholder/800/400";
-        document.getElementById('story-image').src = placeholderImage;
+        const page = content[pageNum];
+        document.getElementById('story-content').innerText = page.text;
+        document.getElementById('story-image').src = page.image_url || "/static/placeholder.png";  // 플레이스홀더 이미지 경로 수정
     }
 
     document.getElementById('prev-page').addEventListener('click', () => {
@@ -94,7 +89,7 @@
     });
 
     document.getElementById('next-page').addEventListener('click', () => {
-        if (currentPage < pages.length - 1) {
+        if (currentPage < content.length - 1) {
             currentPage++;
             showPage(currentPage);
         } else {
@@ -104,4 +99,5 @@
 
     showPage(0);
 </script>
+
 {% endblock %}

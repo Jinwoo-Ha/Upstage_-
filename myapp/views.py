@@ -1,9 +1,11 @@
 from django.shortcuts import render, redirect
-from .models import UserInfo, Story
-from .story_generator import generate_story
+from .models import UserInfo, Story, StoryImage
+from .story_generator import generate_story_with_images
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .chatbot import ask_chatbot, scenario
+from threading import Thread
+import json
 
 @csrf_exempt
 def chatbot_view(request):
@@ -30,15 +32,13 @@ def storyinfo(request):
 def loading(request):
     user_info = UserInfo.objects.last()
     
-    # 동화 생성 시작
     story = Story.objects.create(
         user_info=user_info,
         title=f"{user_info.name}의 {user_info.country_of_interest} 여행",
-        content="",  # 초기에는 빈 내용으로 생성
+        content="",
         voice_type=user_info.voice_type
     )
     
-    # 비동기적으로 동화 생성 시작
     generate_story_async(story.id, user_info)
     
     return render(request, 'myapp/loading.html', {'story_id': story.id})
@@ -48,20 +48,22 @@ def check_story_status(request, story_id):
     status = 'completed' if story.content else 'in_progress'
     return JsonResponse({'status': status})
 
+
 def story(request, story_id):
     story = Story.objects.get(id=story_id)
-    return render(request, 'myapp/story.html', {'story': story})
+    images = story.images.order_by('page_number')
+    pages = story.content.split('\n\n')
+    content = [{'text': pages[i], 'image_url': images[i].image_url if i < len(images) else ''} 
+               for i in range(len(pages))]
+    content_json = json.dumps(content)
+    return render(request, 'myapp/story.html', {'story': story, 'content': content_json})
 
 def end(request):
     return render(request, 'myapp/end.html')
 
-# 비동기 동화 생성 함수
-from django.core.cache import cache
-from threading import Thread
-
 def generate_story_async(story_id, user_info):
     def task():
-        story_content = generate_story(
+        story_content, images = generate_story_with_images(
             name=user_info.name,
             age=user_info.age,
             country=user_info.country_of_interest,
@@ -70,5 +72,9 @@ def generate_story_async(story_id, user_info):
         story = Story.objects.get(id=story_id)
         story.content = story_content
         story.save()
+        
+        for i, image_url in enumerate(images):
+            if image_url:  # image_url이 None이 아닌 경우에만 StoryImage 생성
+                StoryImage.objects.create(story=story, image_url=image_url, page_number=i)
     
     Thread(target=task).start()

@@ -4,18 +4,16 @@ class UserInfo(models.Model):
     name = models.CharField(max_length=100)
     age = models.IntegerField()
     country_of_interest = models.CharField(max_length=100)
-    interests = models.CharField(max_length=200)
+    interests = models.TextField()
     voice_type = models.CharField(max_length=50)
-
-    def __str__(self):
-        return f"{self.name}'s Info"
 
 class Story(models.Model):
     user_info = models.ForeignKey(UserInfo, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
-    content = models.TextField()
-    voice_type = models.CharField(max_length=10)  # 새로 추가된 필드
-    created_at = models.DateTimeField(auto_now_add=True)  # 새로 추가된 필드
+    content = models.TextField()  # JSON 대신 일반 텍스트로 저장
+    voice_type = models.CharField(max_length=50)
 
-    def __str__(self):
-        return self.title
+class StoryImage(models.Model):
+    story = models.ForeignKey(Story, related_name='images', on_delete=models.CASCADE)
+    image_url = models.URLField()
+    page_number = models.IntegerField()
