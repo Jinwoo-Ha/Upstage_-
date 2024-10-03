@@ -32,7 +32,8 @@ def generate_story(name, age, country, interests):
         각 도시에 대한 내용은 최소 200글자가 넘도록 상세히 설명해줘.
 
         단, "카지노, 흡연, 음주, 도박" 등 성인들만 즐길 수 있는 활동은 표시하지 말아줘.
-        동화를 끝낼때는 소감, 교훈에 대해 이야기를 나누어줘.
+        동화를 끝낼때는 소감, 교훈에 대해 이야기를 나누어줘. 
+        소감과 교훈은 다양한 문화에 대한 이해와 존중 그리고 연대감이라는 키워드를 바탕으로 {name}에게 감동을 줄 수 있는 문구로 작성해. 
         """
     )
 
@@ -53,6 +54,32 @@ from openai import OpenAI
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+# def generate_image(prompt):
+#     try:
+#         response = client.images.generate(
+#             model="dall-e-3",
+#             prompt=prompt,
+#             size="1024x1024",
+#             quality="standard",
+#             n=1,
+#         )
+#         return response.data[0].url
+#     except Exception as e:
+#         print(f"이미지 생성 중 오류 발생: {e}")
+#         return None
+
+# def generate_story_with_images(name, age, country, interests):
+#     story_content = generate_story(name, age, country, interests)
+#     pages = story_content.split('\n\n')
+#     images = []
+
+#     for page in pages:
+#         image_prompt = f"{age}살 {name}이(가) {country}에서: {page[:100]}..."
+#         image_url = generate_image(image_prompt)
+#         images.append(image_url)
+
+#     return story_content, images
+
 def generate_image(prompt):
     try:
         response = client.images.generate(
@@ -66,15 +93,27 @@ def generate_image(prompt):
     except Exception as e:
         print(f"이미지 생성 중 오류 발생: {e}")
         return None
-
+    
 def generate_story_with_images(name, age, country, interests):
     story_content = generate_story(name, age, country, interests)
     pages = story_content.split('\n\n')
     images = []
-
+    
     for page in pages:
-        image_prompt = f"{age}살 {name}이(가) {country}에서: {page[:100]}..."
+        # 이미지 프롬프트 생성
+        image_prompt = (
+            f"어린이 동화 스타일의 배경 이미지: "
+            f"{country}의 풍경을 바탕으로, {page[:150]}... 와 관련된 장면. "
+            f"인물은 포함하지 않고 배경만 묘사할 것. "
+            f"부드럽고 따뜻한 색감, 단순하고 귀여운 스타일로 표현. "
+            f"텍스트나 글자는 포함하지 말 것. "
+            f"이야기의 분위기와 감정을 잘 반영할 것."
+            f"생성되는 여러 이미지간의 분위기가 비슷하도록 만들 것"
+
+        )
+        
         image_url = generate_image(image_prompt)
         images.append(image_url)
-
+    
     return story_content, images
+
