@@ -4,6 +4,8 @@ from langchain_upstage import ChatUpstage
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 import openai
+import time
+
 
 load_dotenv()
 
@@ -27,7 +29,7 @@ def generate_story(name, age, country, interests):
         비행기를 타고 {country}에 도착하면, 그 {country}의 대표 공항도 언급해줘.
 
         반드시 모든 문장을 반말로 해줘야 해.
-        {country}에서 방문하는 도시는 최소 다섯 곳 이상에, 각 도시별로 네 가지 이상의 활동을 해야해.
+        {country}에서 방문하는 도시는 최소 세 곳 이상에, 각 도시별로 네 가지 이상의 활동을 해야해.
         {country}의 각 도시에 대한 정보를 상세히 알려주고, 거기서 어떤 음식을 먹는지, 
         그 도시의 구체적인 역사, 유명한 문화, 유명한 스포츠, 필수 관광지에 대해 언급해줘.
         각 도시에 대한 내용은 최소 200글자가 넘도록 상세히 설명해줘.
@@ -55,45 +57,24 @@ from openai import OpenAI
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# def generate_image(prompt):
-#     try:
-#         response = client.images.generate(
-#             model="dall-e-3",
-#             prompt=prompt,
-#             size="1024x1024",
-#             quality="standard",
-#             n=1,
-#         )
-#         return response.data[0].url
-#     except Exception as e:
-#         print(f"이미지 생성 중 오류 발생: {e}")
-#         return None
-
-# def generate_story_with_images(name, age, country, interests):
-#     story_content = generate_story(name, age, country, interests)
-#     pages = story_content.split('\n\n')
-#     images = []
-
-#     for page in pages:
-#         image_prompt = f"{age}살 {name}이(가) {country}에서: {page[:100]}..."
-#         image_url = generate_image(image_prompt)
-#         images.append(image_url)
-
-#     return story_content, images
-
-def generate_image(prompt):
-    try:
-        response = client.images.generate(
-            model="dall-e-3",
-            prompt=prompt,
-            size="1024x1024",
-            quality="standard",
-            n=1,
-        )
-        return response.data[0].url
-    except Exception as e:
-        print(f"이미지 생성 중 오류 발생: {e}")
-        return None
+def generate_image(prompt, retries=3):
+    for attempt in range(retries):
+        try:
+            response = client.images.generate(
+                model="dall-e-3",
+                prompt=prompt,
+                size="1024x1024",
+                quality="standard",
+                n=1,
+            )
+            return response.data[0].url
+        except Exception as e:
+            print(f"이미지 생성 중 오류 발생: {e}. {retries - attempt - 1}회 재시도 남음.")
+            if attempt < retries - 1:
+                time.sleep(2)  # 잠시 대기 후 재시도
+            else:
+                print("모든 시도가 실패했습니다.")
+                return None
     
 def generate_story_with_images(name, age, country, interests):
     story_content = generate_story(name, age, country, interests)
