@@ -35,7 +35,7 @@
 - **사용자 정보 입력**: 이름, 나이, 관심 국가 등의 정보 입력
 - **동화 생성**: solar-1-mini-chat 모델을 활용한 실시간 동화 생성
 - **삽화 생성**: 생성된 동화의 주요 장면을 DALL-E api로 시각화하여 동화와 연관된 이미지 제공
-- **음성 리더기**: 동화 텍스트를 음성으로 읽어주는 기능 제공
+- **음성 리더기**: Google Cloud TTS api를 활용한 동화 텍스트를 음성으로 읽어주는 기능 제공
 
 <img width="681" alt="image" src="https://github.com/user-attachments/assets/a1efce0c-1510-4721-82d6-a5d53b423f79">
 
