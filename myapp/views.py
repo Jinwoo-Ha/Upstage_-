@@ -1,9 +1,10 @@
+# views.py
 from django.shortcuts import render, redirect
 from .models import UserInfo, Story, StoryImage
 from .story_generator import generate_story_with_images
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .chatbot import ask_chatbot, scenario
+from .chatbot import ask_chatbot
 from threading import Thread
 import json
 
@@ -11,7 +12,7 @@ import json
 def chatbot_view(request):
     if request.method == 'POST':
         user_input = request.POST.get('user_input')
-        response = ask_chatbot(user_input, scenario)
+        response = ask_chatbot(user_input)
         return JsonResponse({'response': response})
 
 def landing(request):
@@ -47,7 +48,6 @@ def check_story_status(request, story_id):
     story = Story.objects.get(id=story_id)
     status = 'completed' if story.content else 'in_progress'
     return JsonResponse({'status': status})
-
 
 def story(request, story_id):
     story = Story.objects.get(id=story_id)
