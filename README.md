@@ -28,23 +28,6 @@
 
 • 캐릭터와의 실시간 통화 서비스 지원
 
-## 서비스 활용방법
-
-### 랜딩페이지
-<img width="681" alt="동화 생성" src="서비스 UI/1.JPG">
-
-### 사용자 정보, 관심국가, 관심사 입력
-<img width="681" alt="동화 생성" src="서비스 UI/5.JPG">
-
-### 동화 읽기
-<img width="681" alt="동화 읽기 (리더기 활용)" src="서비스 UI/2.JPG">
-
-### 호솔이와 채팅
-<img width="681" alt="호솔이와 채팅" src="서비스 UI/3.JPG">
-
-### 호솔이와 통화
-<img width="681" alt="호솔이와 통화" src="서비스 UI/4.JPG">
-
 ## 시스템 아키텍처
 <img width="681" alt="image" src="https://github.com/user-attachments/assets/a1efce0c-1510-4721-82d6-a5d53b423f79">
 <img width="681" alt="image" src="https://github.com/user-attachments/assets/d64c6fd0-0ab7-4b22-b71e-fd2f0c2e0c06">
@@ -55,6 +38,22 @@
 - **챗봇 활용**: 동화 읽은 후 챗봇을 통해 학습 내용을 점검하고 추가 학습을 지원
 - **TTS 및 통화 서비스**: 실시간 동화 리더기 제공 및 음성 소통 서비스로 아이들에게 몰입형 경험 제공
 
+## 서비스 활용방법
+
+### 랜딩페이지
+<img width="681" alt="동화 생성" src="Service UI/landingpage.JPG">
+
+### 사용자 정보, 관심국가, 관심사 입력
+<img width="681" alt="동화 생성" src="Service UI/storyinfo.JPG">
+
+### 동화 읽기
+<img width="681" alt="동화 읽기 (리더기 활용)" src="Service UI/story.JPG">
+
+### 호솔이와 채팅
+<img width="681" alt="호솔이와 채팅" src="Service UI/chatbot.JPG">
+
+### 호솔이와 통화
+<img width="681" alt="호솔이와 통화" src="Service UI/call.JPG">
 
 ## 한계점 및 향후 작업 (수정요망)
 
