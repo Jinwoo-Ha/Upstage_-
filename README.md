@@ -40,8 +40,8 @@
 <img width="681" alt="image" src="https://github.com/user-attachments/assets/a1efce0c-1510-4721-82d6-a5d53b423f79">
 
 ### 캐릭터와 채팅 및 통화 
-- **챗봇 기능**: 동화 읽는 과정에서 궁금한 점을 챗봇에게 물어보는 등 추가적인 학습 기회 제공
-- **통화 서비스**: 캐릭터와 실시간 음성 소통하는 기능으로 아이들에게 재미와 몰입형 경험 제공
+- **챗봇 기능**: solar-1-mini-chat 모델을 활용한 챗봇으로 궁금한 점을 물어보는 등 추가적인 학습 기회 제공
+- **통화 서비스**: Web Speech api와 Google Cloud TTS api를 활용하여 캐릭터와 실시간 음성 소통하는 기능으로 아이들에게 재미와 몰입형 경험 제공
 
 <img width="681" alt="image" src="https://github.com/user-attachments/assets/d64c6fd0-0ab7-4b22-b71e-fd2f0c2e0c06">
 
