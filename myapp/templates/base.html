@@ -259,18 +259,25 @@
             const callButton = document.getElementById('callButton');
             const callScreen = document.getElementById('callScreen');
             const endCallButton = document.getElementById('endCallButton');
+            const callStatus = document.querySelector('.call-status');
 
             let recognition;
             let synthesis;
             let currentUtterance = null;
+            let isListening = false;
+            let isWaitingForUserInput = true;
+            let isSpeaking = false;
+            let noiseDetectionTimeout;
 
+            // 음성 인식 초기화
             if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
                 recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
                 recognition.lang = 'ko-KR';
-                recognition.continuous = true;
+                recognition.continuous = false;
                 recognition.interimResults = false;
             }
 
+            // 음성 합성 초기화
             if ('speechSynthesis' in window) {
                 synthesis = window.speechSynthesis;
             }
@@ -305,27 +312,40 @@
 
             function sendChatMessage() {
                 const message = chatInput.value.trim();
-                if (message) {
+                if (message && isWaitingForUserInput) {
+                    isWaitingForUserInput = false;
                     addMessage(message, true);
                     chatInput.value = '';
                     
-                    fetch('/chatbot/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            'X-CSRFToken': getCookie('csrftoken')
-                        },
-                        body: 'user_input=' + encodeURIComponent(message)
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        addMessage(data.response);
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        addMessage('죄송해요, 오류가 발생했어요. 다시 시도해 주세요.');
-                    });
+                    fetchChatbotResponse(message);
                 }
+            }
+
+            function fetchChatbotResponse(message) {
+                updateCallStatus('답변 생성 중...');
+                fetch('/chatbot/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: 'user_input=' + encodeURIComponent(message)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    addMessage(data.response);
+                    if (isListening) {
+                        speakResponse(data.response);
+                    } else {
+                        isWaitingForUserInput = true;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    addMessage('죄송해요, 오류가 발생했어요. 다시 시도해 주세요.');
+                    updateCallStatus('오류 발생');
+                    isWaitingForUserInput = true;
+                });
             }
 
             sendMessage.addEventListener('click', sendChatMessage);
@@ -343,6 +363,7 @@
                 chatWindow.style.display = 'none';
                 callScreen.style.display = 'flex';
                 startVoiceRecognition();
+                updateCallStatus('연결 중...');
             }
 
             function endCall() {
@@ -350,22 +371,51 @@
                 chatWindow.style.display = 'flex';
                 stopVoiceRecognition();
                 stopSpeaking();
+                updateCallStatus('통화 종료');
             }
 
             function startVoiceRecognition() {
-                if (recognition) {
+                if (recognition && isWaitingForUserInput && !isSpeaking) {
+                    isListening = true;
                     recognition.start();
-                    recognition.onresult = function(event) {
-                        const last = event.results.length - 1;
-                        const text = event.results[last][0].transcript;
-                        processVoiceInput(text);
+                    recognition.onresult = handleRecognitionResult;
+                    recognition.onend = () => {
+                        if (isListening && isWaitingForUserInput && !isSpeaking) {
+                            setTimeout(() => {
+                                recognition.start();
+                            }, 100);
+                        }
                     };
+                    updateCallStatus('듣는 중...');
                 }
             }
 
             function stopVoiceRecognition() {
                 if (recognition) {
+                    isListening = false;
                     recognition.stop();
+                }
+            }
+
+            function handleRecognitionResult(event) {
+                let finalTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    }
+                }
+
+                if (finalTranscript && isWaitingForUserInput) {
+                    clearTimeout(noiseDetectionTimeout);
+                    if (finalTranscript.length > 2) {  // 노이즈 필터링: 2글자 이상만 처리
+                        isWaitingForUserInput = false;
+                        addMessage(finalTranscript, true);
+                        processVoiceInput(finalTranscript);
+                    } else {
+                        console.log('Ignored short input (likely noise):', finalTranscript);
+                        startVoiceRecognition();
+                    }
                 }
             }
 
@@ -376,41 +426,76 @@
                 if (currentUtterance) {
                     currentUtterance.onend = null;
                 }
+                isSpeaking = false;
             }
 
             function processVoiceInput(text) {
-                fetch('/chatbot/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-CSRFToken': getCookie('csrftoken')
-                    },
-                    body: 'user_input=' + encodeURIComponent(text)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    speakResponse(data.response);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    speakResponse('죄송해요, 오류가 발생했어요. 다시 시도해 주세요.');
-                });
+                updateCallStatus('답변 생성 중...');
+                fetchChatbotResponse(text);
             }
 
             function speakResponse(text) {
                 if (synthesis) {
                     stopSpeaking();
+                    updateCallStatus('답변 중...');
+                    isSpeaking = true;
                     const utterance = new SpeechSynthesisUtterance(text);
                     utterance.lang = 'ko-KR';
-                    currentUtterance = utterance;
-                    
-                    utterance.onend = function() {
-                        currentUtterance = null;
-                        startVoiceRecognition();
+                    utterance.onend = () => {
+                        isSpeaking = false;
+                        setTimeout(() => {
+                            updateCallStatus('듣는 중...');
+                            isWaitingForUserInput = true;
+                            startVoiceRecognition();
+                        }, 1000);  // 1초 대기 후 음성 인식 시작
                     };
-                    
+                    utterance.onerror = (event) => {
+                        console.error('Speech synthesis error', event);
+                        isSpeaking = false;
+                        retrySpeak(text, 0);
+                    };
+                    currentUtterance = utterance;
                     synthesis.speak(utterance);
+                } else {
+                    console.error('Speech synthesis not supported');
+                    updateCallStatus('음성 합성을 지원하지 않습니다');
+                    isWaitingForUserInput = true;
+                    startVoiceRecognition();
                 }
+            }
+
+            function retrySpeak(text, retryCount) {
+                if (retryCount < 3) {
+                    console.log(`Retrying speech synthesis (attempt ${retryCount + 1})`);
+                    setTimeout(() => {
+                        const utterance = new SpeechSynthesisUtterance(text);
+                        utterance.lang = 'ko-KR';
+                        utterance.onend = () => {
+                            isSpeaking = false;
+                            setTimeout(() => {
+                                updateCallStatus('듣는 중...');
+                                isWaitingForUserInput = true;
+                                startVoiceRecognition();
+                            }, 1000);
+                        };
+                        utterance.onerror = (event) => {
+                            console.error('Speech synthesis retry error', event);
+                            isSpeaking = false;
+                            retrySpeak(text, retryCount + 1);
+                        };
+                        isSpeaking = true;
+                        synthesis.speak(utterance);
+                    }, 1000);
+                } else {
+                    console.error('Speech synthesis failed after multiple attempts');
+                    updateCallStatus('음성 출력 실패. 텍스트로 대화를 계속합니다.');
+                    isWaitingForUserInput = true;
+                    startVoiceRecognition();
+                }
+            }
+
+            function updateCallStatus(status) {
+                callStatus.textContent = status;
             }
 
             function getCookie(name) {
@@ -427,6 +512,50 @@
                 }
                 return cookieValue;
             }
+
+            // 에러 처리
+            recognition.onerror = function(event) {
+                console.error('Speech recognition error', event.error);
+                updateCallStatus('음성 인식 오류: ' + event.error);
+                isWaitingForUserInput = true;
+                startVoiceRecognition();
+            };
+
+            // 음성 합성 엔진 초기화 및 최적화
+            function initSpeechSynthesis() {
+                return new Promise((resolve, reject) => {
+                    let voices = synthesis.getVoices();
+                    if (voices.length > 0) {
+                        resolve(voices);
+                    } else {
+                        synthesis.onvoiceschanged = () => {
+                            voices = synthesis.getVoices();
+                            resolve(voices);
+                        };
+                        // 5초 후에도 음성이 로드되지 않으면 거부
+                        setTimeout(() => reject('음성 로드 시간 초과'), 5000);
+                    }
+                });
+            }
+
+            // 음성 합성 엔진 초기화
+            initSpeechSynthesis()
+                .then(voices => {
+                    console.log('Available voices:', voices);
+                    // 한국어 음성 찾기
+                    const koreanVoice = voices.find(voice => voice.lang === 'ko-KR');
+                    if (koreanVoice) {
+                        console.log('Korean voice found:', koreanVoice.name);
+                        // 기본 음성으로 설정
+                        synthesis.voice = koreanVoice;
+                    } else {
+                        console.warn('No Korean voice found. Using default voice.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Failed to initialize speech synthesis:', error);
+                    updateCallStatus('음성 합성 초기화 실패');
+                });
         });
     </script>
 </body>

@@ -1,29 +1,15 @@
-# chatbot.py
-
-import os
-import re
 import json
 from typing import List, Dict, Any, Optional
 from pprint import pprint
+import os
+import re
 
 from django.conf import settings
-
 from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
 from langchain_upstage import ChatUpstage
 from langchain_community.tools import DuckDuckGoSearchResults
-
 from openai import OpenAI
-
-# chatbot.py
-import os
-import re
-from openai import OpenAI
-from django.conf import settings
-from langchain_upstage import ChatUpstage
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
-from langchain_community.tools import DuckDuckGoSearchResults
 
 # OpenAI 클라이언트 초기화
 client = OpenAI(api_key=settings.UPSTAGE_API_KEY, base_url="https://api.upstage.ai/v1/solar")
@@ -176,8 +162,18 @@ def ask_chatbot(user_input):
             Your answer must always be written in three sentences.
             """
         },
+        # few-shot examples
         {"role": "user", "content": "안녕? 넌 누구야?"},
         {"role": "assistant", "content": "안녕? 나는 호솔이라고 해. 무엇이 궁금하니?"},
+
+        {"role": "user", "content": "일본에 대해서 알려줘!"},
+        {"role": "assistant", "content": "일본은 벚꽃이 정말 예쁘고 후지산이라는 높은 산이 있어. 일본 사람들은 스시라는 음식을 많이 먹는데, 생선과 밥으로 만든 특별한 음식이야."},
+
+        {"role": "user", "content": "사막은 어떻게 생겼어?"},
+        {"role": "assistant", "content": "사막은 아주 넓고 뜨거운 모래로 덮인 곳이야. 낮에는 아주 뜨겁고, 밤에는 추워져. 하지만 가끔 선인장이나 작은 동물들도 볼 수 있어."},
+        
+        {"role": "user", "content": "기린은 왜 목이 길어?"},
+        {"role": "assistant", "content": "기린은 나무 높은 곳에 있는 잎을 먹기 위해 목이 길어! 목이 길어서 멀리서도 다른 기린이나 포식자를 잘 볼 수 있어."},
     ]
 
     messages.append({"role": "user", "content": user_input})

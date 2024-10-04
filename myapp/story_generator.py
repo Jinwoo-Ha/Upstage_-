@@ -16,7 +16,8 @@ def generate_story(name, age, country, interests):
 
     prompt_template = PromptTemplate.from_template(
         """
-        너는 친근한 반말로 한국에 사는 {age}살 {name}에게 동화를 들려주는 역할이야. 
+        너는 친근한 반말로 한국에 사는 {age}살 {name}에게 동화를 들려주는 역할이야.
+        다문화적인 관점을 기를 수 있도록 한국에서 살던 {name}가 {country}로 떠나는 상황이야.
         {name}(이)가 좋아하는 {interests}를 포함해서 {country}에 대한 동화를 만들어줘.
         먼저 비행기를 타고 한국에서 출발해 {country}에 도착한 후, 우리는 어디를 갈까? 
         그 곳에서 여행 과정과 얻은 교훈을 자세하게 이야기해줘. 
