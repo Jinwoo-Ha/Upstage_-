@@ -78,3 +78,33 @@ def generate_story_async(story_id, user_info):
                 StoryImage.objects.create(story=story, image_url=image_url, page_number=i)
     
     Thread(target=task).start()
+
+# Google cloud tts
+from django.http import HttpResponse
+from google.cloud import texttospeech
+import json
+
+def text_to_speech(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        text = data.get('text', '')
+
+        client = texttospeech.TextToSpeechClient()
+        synthesis_input = texttospeech.SynthesisInput(text=text)
+
+        voice = texttospeech.VoiceSelectionParams(
+            language_code="ko-KR", 
+            name="ko-KR-Neural2-C"
+        )
+
+        audio_config = texttospeech.AudioConfig(
+            audio_encoding=texttospeech.AudioEncoding.MP3
+        )
+
+        response = client.synthesize_speech(
+            input=synthesis_input, voice=voice, audio_config=audio_config
+        )
+
+        return HttpResponse(response.audio_content, content_type='audio/mpeg')
+    
+    return HttpResponse(status=405)  # Method Not Allowed
