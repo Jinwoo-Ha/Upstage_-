@@ -45,6 +45,10 @@
 
 <img width="681" alt="image" src="https://github.com/user-attachments/assets/d64c6fd0-0ab7-4b22-b71e-fd2f0c2e0c06">
 
+### 웹 개발
+- Frontend: HTML, CSS, Javascript
+- Backend: Python, Django
+  
 ## 서비스 활용방법
 
 ### 랜딩페이지
