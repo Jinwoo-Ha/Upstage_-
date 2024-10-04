@@ -37,13 +37,13 @@
 - **삽화 생성**: 생성된 동화의 주요 장면을 DALL-E api로 시각화하여 동화와 연관된 이미지 제공
 - **음성 리더기**: Google Cloud TTS api를 활용한 동화 텍스트를 음성으로 읽어주는 기능 제공
 
-<img width="681" alt="image" src="https://github.com/user-attachments/assets/a1efce0c-1510-4721-82d6-a5d53b423f79">
+<img width="681" alt="image" src="Service UI/modeling1.JPG">
 
 ### 캐릭터와 채팅 및 통화 
 - **챗봇 기능**: solar-1-mini-chat 모델을 활용한 챗봇으로 궁금한 점을 물어보는 등 추가적인 학습 기회 제공
 - **통화 서비스**: Web Speech api와 Google Cloud TTS api를 활용하여 캐릭터와 실시간 음성 소통하는 기능으로 아이들에게 재미와 몰입형 경험 제공
 
-<img width="681" alt="image" src="https://github.com/user-attachments/assets/d64c6fd0-0ab7-4b22-b71e-fd2f0c2e0c06">
+<img width="681" alt="image" src="Service UI/modeling2.JPG">
 
 ### 웹 개발
 - Frontend: HTML, CSS, Javascript
