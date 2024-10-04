@@ -48,7 +48,7 @@
 ### 웹 개발
 - Frontend: HTML, CSS, Javascript
 - Backend: Python, Django
-
+- UI: myapp -> templates -> myapp에서 확인 가능
 
 ## LLM Modeling 
 - **동화 콘텐츠 생성 코드**: myapp -> story_generator.py
