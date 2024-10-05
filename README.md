@@ -88,3 +88,7 @@
 - **캐릭터 음성 API 사용**: 현재는 기본 성우 음성을 사용하고 있으나, 향후에 캐릭터 음성 API를 활용해 더욱 생동감 있는 동화를 제공할 예정
 - **학습 도구로서의 추가 기능**: 동화 내용에 대한 퀴즈나 빈칸 맞추기 등의 교육적 기능 추가
 - **다국어 버전 개발**: 다문화 아동이 한국을 이해하는 데 도움이 되도록 다양한 언어로 확장
+
+## 참고자료
+- 데모 비디오: https://youtu.be/bj6lR3HpYHg?si=BMAyIT90xb_2Bfwl
+- 프로젝트 소개서: https://drive.google.com/file/d/11_X6CHU1AxmAXlCc4qiMMiKjhoTJxIt4/view?usp=sharing
